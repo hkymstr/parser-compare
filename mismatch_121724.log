@@ -1,0 +1,35 @@
+Log File Analysis Report for: logfile.log
+==================================================
+
+Line Number: 4
+Original line: Verify 0x0A
+Verify value: 0x0A
+Next line: 0x009739 0x0B
+Second number: 0x0B
+Second num last 2B: 0x000B
+--------------------------------------------------
+
+Line Number: 7
+Original line: Verify 0x0A
+Verify value: 0x0A
+Next line: 0x009739 0x0C
+Second number: 0x0C
+Second num last 2B: 0x000C
+--------------------------------------------------
+
+Line Number: 13
+Original line: Verify 0x0A
+Verify value: 0x0A
+Next line: 0x009739 0x03
+Second number: 0x03
+Second num last 2B: 0x0003
+--------------------------------------------------
+
+Line Number: 22
+Original line: Verify 0x0A
+Verify value: 0x0A
+Next line: 0x009739 0x00C
+Second number: 0x00C
+Second num last 2B: 0x000C
+--------------------------------------------------
+

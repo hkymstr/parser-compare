@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 
 def get_last_2_bytes(hex_value):
@@ -43,6 +44,58 @@ def get_next_line_value(line):
             return '0x' + col
 
     return None
+
+
+def get_mismatch_filename():
+    """
+    Generate mismatch filename with date format mmddyy
+
+    Returns:
+        str: Filename in format mismatch_mmddyy.log
+    """
+    current_date = datetime.now()
+    date_str = current_date.strftime("%m%d%y")
+    return f"mismatch_{date_str}.log"
+
+
+def export_mismatches(results, input_file, output_file=None):
+    """
+    Export all comparison results to a log file, highlighting mismatches.
+
+    Args:
+        results (list): List of result dictionaries
+        input_file (str): Name of the input file that was parsed
+        output_file (str): Optional name for the output file
+    """
+    if output_file is None:
+        output_file = get_mismatch_filename()
+
+    try:
+        with open(output_file, 'w') as f:
+            # Write header with parsed filename
+            f.write(f"Log File Analysis Report for: {input_file}\n")
+            f.write("=" * 50 + "\n\n")
+
+            # Track if we found any mismatches
+            mismatch_found = False
+
+            for result in results:
+                if not result['match']:
+                    mismatch_found = True
+                    f.write(f"Line Number: {result['line_number']}\n")
+                    f.write(f"Original line: {result['original_line']}\n")
+                    f.write(f"Verify value: {result['verify_value']}\n")
+                    f.write(f"Next line: {result['next_line']}\n")
+                    f.write(f"Second number: {result['second_number']}\n")
+                    f.write(f"Second num last 2B: {result['last_2_bytes']}\n")
+                    f.write("-" * 50 + "\n\n")
+
+            if not mismatch_found:
+                f.write("No mismatches found in this file.\n")
+
+            print(f"\nAnalysis report has been exported to {output_file}")
+    except Exception as e:
+        print(f"Error writing to mismatch log: {str(e)}")
 
 
 def parse_log_file(file_path):
@@ -102,33 +155,15 @@ def parse_log_file(file_path):
     return results
 
 
-def export_mismatches(results, output_file="mismatch.log"):
-    """
-    Export mismatched results to a log file.
-    """
-    try:
-        with open(output_file, 'w') as f:
-            f.write("Mismatch Log Report\n")
-            f.write("==================\n\n")
-
-            for result in results:
-                if not result['match']:
-                    f.write(f"Line Number: {result['line_number']}\n")
-                    f.write(f"Original line: {result['original_line']}\n")
-                    f.write(f"Verify value: {result['verify_value']}\n")
-                    f.write(f"Next line: {result['next_line']}\n")
-                    f.write(f"Second number: {result['second_number']}\n")
-                    f.write(f"Second num last 2B: {result['last_2_bytes']}\n")
-                    f.write("-" * 50 + "\n\n")
-
-            print(f"\nMismatches have been exported to {output_file}")
-    except Exception as e:
-        print(f"Error writing to mismatch log: {str(e)}")
-
-
 def calculate_statistics(results):
     """
     Calculate match/mismatch statistics from results.
+
+    Args:
+        results (list): List of result dictionaries
+
+    Returns:
+        dict: Dictionary containing statistics
     """
     total = len(results)
     matches = sum(1 for r in results if r['match'])
@@ -209,9 +244,13 @@ def plot_results(stats):
     plt.show()
 
 
-def display_results(results):
+def display_results(results, input_file):
     """
     Display the results of the log file analysis.
+
+    Args:
+        results (list): List of dictionaries containing comparison results
+        input_file (str): Name of the input file that was parsed
     """
     if results:
         print("\nResults of log file analysis:")
@@ -236,9 +275,8 @@ def display_results(results):
         print(f"Match Rate:           {stats['match_rate']:.1f}%")
         print("-" * 70)
 
-        # Export mismatches if any exist
-        if stats['mismatches'] > 0:
-            export_mismatches(results)
+        # Always export results
+        export_mismatches(results, input_file)
 
         # Plot the results
         plot_results(stats)
@@ -250,9 +288,14 @@ def main():
     """
     Main function to run the log file parser.
     """
+    # Get the log file path from user input
     log_file = input("Enter the path to your log file: ")
+
+    # Parse the log file
     results = parse_log_file(log_file)
-    display_results(results)
+
+    # Display the results and statistics
+    display_results(results, log_file)
 
 
 if __name__ == '__main__':
